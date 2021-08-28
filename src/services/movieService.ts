@@ -22,6 +22,7 @@ export class MovieService implements IMovieService {
         videoUrl: string
     ): Promise<any[]> {
         try {
+            console.log(config.apiConfig.baseUrl);
             const response = await axios.post(
                 `${config.apiConfig.baseUrl}/createMovie`,
                 {

@@ -5,7 +5,7 @@ const localApiConfig = {
     baseUrl: 'http://localhost:5000/v1',
 };
 const prodApiConfig = {
-    baseUrl: 'http://localhost:5000/v1',
+    baseUrl: 'https://assignment-01-service.herokuapp.com/v1',
 };
 console.log(process.env.REACT_APP_ENVIRONMENT);
 

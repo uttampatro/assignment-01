@@ -35,8 +35,8 @@ function Home() {
     };
 
     // Get current posts
-    const indexOfLastMovie = currentPage * moviesPerPage;
-    const indexOfFirstMovie = indexOfLastMovie - moviesPerPage;
+    const indexOfLastMovie: any = currentPage * moviesPerPage;
+    const indexOfFirstMovie: any = indexOfLastMovie - moviesPerPage;
     const currentMovies = movies.slice(indexOfFirstMovie, indexOfLastMovie);
 
     useEffect(() => {
