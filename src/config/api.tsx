@@ -2,10 +2,10 @@ const isProduction = process.env.REACT_APP_ENVIRONMENT === 'production';
 // const isDevelopment = process.env.REACT_APP_ENVIRONMENT === 'development';
 
 const localApiConfig = {
-    baseUrl: 'http://localhost:5000/v1',
+    baseUrl: 'http://localhost:5000',
 };
 const prodApiConfig = {
-    baseUrl: 'https://assignment-01-service.herokuapp.com/v1',
+    baseUrl: 'https://assignment-01-service.herokuapp.com',
 };
 console.log(process.env.REACT_APP_ENVIRONMENT);
 

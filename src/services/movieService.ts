@@ -1,5 +1,5 @@
 import axios from './axiox';
-import * as config from './../config/api';
+import * as config from '../config/api';
 
 export interface IMovieService {
     createCourse(
@@ -22,9 +22,8 @@ export class MovieService implements IMovieService {
         videoUrl: string
     ): Promise<any[]> {
         try {
-            console.log(config.apiConfig.baseUrl);
             const response = await axios.post(
-                `${config.apiConfig.baseUrl}/createMovie`,
+                `${config.apiConfig.baseUrl}/v1/createMovie`,
                 {
                     name,
                     releaseYear,
@@ -41,8 +40,10 @@ export class MovieService implements IMovieService {
     }
     async getAllMovie(): Promise<any> {
         try {
+            console.log(config.apiConfig.baseUrl);
+            // debugger
             const response = await axios.get(
-                `${config.apiConfig.baseUrl}/getMovieList`
+                `${config.apiConfig.baseUrl}/v1/getMovieList`
             );
             return response.data;
         } catch (error) {
@@ -52,7 +53,7 @@ export class MovieService implements IMovieService {
     async getMovie(id: any): Promise<any> {
         try {
             const response = await axios.get(
-                `${config.apiConfig.baseUrl}/getMovie/${id}`
+                `${config.apiConfig.baseUrl}/v1/getMovie/${id}`
             );
             return response.data;
         } catch (error) {
