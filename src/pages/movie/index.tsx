@@ -32,14 +32,12 @@ function Movie() {
 
     return (
         <div className="movie">
-            <div className="movie_body">
-                <ReactPlayer
-                    className="movie_video"
-                    width="100vw"
-                    height="100vh"
-                    url={movie.videoUrl}
-                />
-            </div>
+            <ReactPlayer
+                className="movie_video"
+                width="100vw"
+                height="100vh"
+                url={movie.videoUrl}
+            />
         </div>
     );
 }
