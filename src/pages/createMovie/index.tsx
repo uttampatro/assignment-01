@@ -48,7 +48,6 @@ function CreateMovie() {
     const createMovie = async (e: any) => {
         e.preventDefault();
         try {
-            setIsCreatingMovie(true);
             const { name, releaseYear, language, imageFile, videFile } = movie;
 
             if (!imageFile) {
@@ -59,6 +58,7 @@ function CreateMovie() {
                 return alert('please upload movie video');
             }
 
+            setIsCreatingMovie(true);
             const imageUrl = await uploadThumbnail(imageFile);
             const videoUrl = await uploadMovie(videFile);
 
