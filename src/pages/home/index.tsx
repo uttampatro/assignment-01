@@ -78,9 +78,14 @@ function Home() {
                                         {movie.name}
                                     </p>
 
-                                    <h3>{movie.releaseYear}</h3>
+                                    <h3>
+                                        {' '}
+                                        Year of Release: {movie.releaseYear}
+                                    </h3>
 
-                                    <p>{movie.language}</p>
+                                    <p>
+                                        Language: <span>{movie.language}</span>
+                                    </p>
                                 </div>
                             </div>
                         </Link>

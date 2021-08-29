@@ -71,11 +71,16 @@
 
 .home_description > p {
     font-weight: 500;
+    color: #535557;
     line-height: 1;
     margin-left: 10px;
     margin-top: 0.4rem;
     padding: 0.4rem 0;
     white-space: nowrap;
+}
+
+.home_description > p > span {
+    color: black;
 }
 
 .home_footer {
