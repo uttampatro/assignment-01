@@ -2,25 +2,26 @@ import axios from './axiox';
 import * as config from '../config/api';
 
 export interface IMovieService {
-    createCourse(
-        name: string,
-        releaseYear: string,
-        language: string,
-        imageUrl: string,
-        videoUrl: string
-    ): Promise<any[]>;
-    getAllMovie(): Promise<any[]>;
+    createMovie(dto: {
+        name: string;
+        releaseYear: string;
+        language: string;
+        imageUrl: string;
+        videoUrl: string;
+    }): Promise<any[]>;
+    getAllMovie(dto: { page: number; limit: number }): Promise<any[]>;
     getMovie(id: any): Promise<any[]>;
 }
 
 export class MovieService implements IMovieService {
-    async createCourse(
-        name: string,
-        releaseYear: string,
-        language: string,
-        imageUrl: string,
-        videoUrl: string
-    ): Promise<any[]> {
+    async createMovie(dto: {
+        name: string;
+        releaseYear: string;
+        language: string;
+        imageUrl: string;
+        videoUrl: string;
+    }): Promise<any[]> {
+        const { name, releaseYear, language, imageUrl, videoUrl } = dto;
         try {
             const response = await axios.post(
                 `${config.apiConfig.baseUrl}/v1/createMovie`,
@@ -38,12 +39,10 @@ export class MovieService implements IMovieService {
             return [];
         }
     }
-    async getAllMovie(): Promise<any> {
+    async getAllMovie(dto: { page: number; limit: number }): Promise<any> {
         try {
-            console.log(config.apiConfig.baseUrl);
-            // debugger
             const response = await axios.get(
-                `${config.apiConfig.baseUrl}/v1/getMovieList`
+                `${config.apiConfig.baseUrl}/v1/getMovieList?page=${dto.page}&limit=${dto.limit}`
             );
             return response.data;
         } catch (error) {
@@ -56,6 +55,25 @@ export class MovieService implements IMovieService {
                 `${config.apiConfig.baseUrl}/v1/getMovie/${id}`
             );
             return response.data;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async generateSignedUrl(fileName: string): Promise<any> {
+        try {
+            const response = await axios.get(
+                `${config.apiConfig.baseUrl}/v1/sign-url?filename=${fileName}`
+            );
+            return response.data;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async uploadFile(signedUrl: string, file: File): Promise<any> {
+        try {
+            await axios.put(signedUrl, file);
         } catch (error) {
             console.log(error);
         }

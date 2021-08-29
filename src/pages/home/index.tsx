@@ -1,15 +1,16 @@
 import React from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
-import Pagination from '@material-ui/lab/Pagination';
+import TablePagination from '@material-ui/core/TablePagination';
 import movieService from '../../services/movieService';
 import './style.css';
 import { Link, useHistory } from 'react-router-dom';
 
 function Home() {
     const [movies, setMovies] = useState<any[]>([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [moviesPerPage, setMoviesPerPage] = useState(4);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [moviesPerPage, setMoviesPerPage] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
     const history = useHistory();
 
     const uploadMovie = () => {
@@ -20,28 +21,31 @@ function Home() {
         }
     };
 
-    const handleChange = (event: any, value: any) => {
+    const handleChangePage = (event: any, value: any) => {
         setCurrentPage(value);
-        const paginate = (pageNumber: any) => setCurrentPage(pageNumber);
+    };
+
+    const handleChangeRowsPerPage = (event: any) => {
+        setMoviesPerPage(parseInt(event.target.value, 10));
+        setCurrentPage(0);
     };
 
     const fetchMovieList = async () => {
         try {
-            const data = await movieService.getAllMovie();
-            setMovies(data);
+            const result = await movieService.getAllMovie({
+                page: currentPage + 1,
+                limit: moviesPerPage,
+            });
+            setMovies(result.movieList);
+            setTotalCount(result.pagination.count);
         } catch (error) {
             console.log(error);
         }
     };
 
-    // Get current posts
-    const indexOfLastMovie: any = currentPage * moviesPerPage;
-    const indexOfFirstMovie: any = indexOfLastMovie - moviesPerPage;
-    const currentMovies = movies.slice(indexOfFirstMovie, indexOfLastMovie);
-
     useEffect(() => {
         fetchMovieList();
-    }, []);
+    }, [currentPage, moviesPerPage]);
 
     return (
         <div className="home">
@@ -53,7 +57,7 @@ function Home() {
                 <button onClick={uploadMovie}>Upload Movie</button>
             </div>
             <div className="home_feed">
-                {currentMovies.map(movie => {
+                {movies.map(movie => {
                     return (
                         <Link
                             to={`/movie/${movie._id}`}
@@ -83,11 +87,12 @@ function Home() {
                     );
                 })}
                 <div className="home_footer">
-                    <p>Page:{currentPage}</p>
-                    <Pagination
-                        count={10}
+                    <TablePagination
+                        count={totalCount}
                         page={currentPage}
-                        onChange={handleChange}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={moviesPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
                     />
                 </div>
             </div>

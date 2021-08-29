@@ -21,7 +21,7 @@
     display: flex;
     justify-content: center;
     padding-top: 15px;
-    padding-bottom: 50px;
+    padding-bottom: 30px;
 }
 
 .createMovie_group {
@@ -91,3 +91,12 @@
     display: flex;
     justify-content: space-between;
 }
+
+.createMovie_group_button {
+    cursor: pointer;
+    border-radius: 2px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+

@@ -32,11 +32,12 @@
 
 .home_feed {
     display: flex;
+    justify-content: center;
     padding: 20px;
     width: 80%;
     flex-direction: column;
     position: absolute;
-    padding-left: 300px;
+    padding-left: 350px;
 }
 
 .home_body {
@@ -50,14 +51,12 @@
 
 .home_description {
     color: #1c1d1f;
-    min-width: 1px;
     position: relative;
 }
 
 .home_description_p {
     font-weight: 600;
     margin-left: 10px;
-
     font-size: x-large;
     margin-bottom: 10px;
 }

@@ -1,65 +1,127 @@
-import { Button, CircularProgress, LinearProgress } from '@material-ui/core';
+import { Button, CircularProgress, makeStyles } from '@material-ui/core';
 import React, { useState } from 'react';
 import './style.css';
 import 'react-circular-progressbar/dist/styles.css';
 import movieService from '../../services/movieService';
-import Dropzone from 'react-dropzone-uploader';
 import { useHistory } from 'react-router-dom';
+import { green } from '@material-ui/core/colors';
+
+const useStyles = makeStyles(() => ({
+    root: {
+        display: 'flex',
+        alignItems: 'center',
+    },
+    buttonProgress: {
+        color: green[500],
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginTop: -12,
+        marginLeft: -12,
+    },
+}));
 
 function CreateMovie() {
-    const [name, setName] = useState('');
-    const [releaseYear, setReleaseYear] = useState('');
-    const [language, setLanguage] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
-    const [videoUrl, setVideoUrl] = useState('');
-    const [progress, setProgress] = useState(0);
-    const [videoProgress, setVideoProgress] = useState(0);
+    const classes = useStyles();
     const history = useHistory();
+    const [movie, setMovie] = useState<{
+        name: string;
+        releaseYear: string;
+        language: string;
+        imageUrl: string;
+        videoUrl: string;
+        previewImage: string;
+        imageFile: File | null;
+        videFile: File | null;
+    }>({
+        name: '',
+        releaseYear: '',
+        language: '',
+        imageUrl: '',
+        videoUrl: '',
+        previewImage: '',
+        imageFile: null,
+        videFile: null,
+    });
+    const [isCreatingMovie, setIsCreatingMovie] = useState(false);
 
-    const save = async () => {
+    const createMovie = async (e: any) => {
+        e.preventDefault();
         try {
-            const response = await movieService.createCourse(
+            setIsCreatingMovie(true);
+            const { name, releaseYear, language, imageFile, videFile } = movie;
+
+            if (!imageFile) {
+                return alert('please upload movie thumbnail');
+            }
+
+            if (!videFile) {
+                return alert('please upload movie video');
+            }
+
+            const imageUrl = await uploadThumbnail(imageFile);
+            const videoUrl = await uploadMovie(videFile);
+
+            await movieService.createMovie({
                 name,
                 releaseYear,
                 language,
                 imageUrl,
-                videoUrl
-            );
+                videoUrl,
+            });
+            setIsCreatingMovie(false);
+            alert('movie created successfully');
+            history.push('/home');
         } catch (error) {
+            setIsCreatingMovie(false);
             console.log(error);
+            alert(JSON.stringify(error));
         }
     };
 
-    const setThumbnailTime = () => {
-        const timer: any = setInterval(() => {
-            setProgress((oldProgress: any) => {
-                if (oldProgress === 100) {
-                    return 0;
-                }
-                const diff = Math.random() * 10;
-                return Math.min(oldProgress + diff, 100);
-            });
-        }, 500);
-
-        return () => {
-            clearInterval(timer);
-        };
+    const uploadThumbnail = async (imageFile: File) => {
+        const awsSignedUrlRes = await movieService.generateSignedUrl(
+            imageFile?.name
+        );
+        const thumbnailSignedUrl = awsSignedUrlRes.signedRequest;
+        const imageUrl = awsSignedUrlRes.url;
+        await movieService.uploadFile(thumbnailSignedUrl, imageFile);
+        return imageUrl;
     };
 
-    const setVideoTime = () => {
-        const timer: any = setInterval(() => {
-            setVideoProgress((oldProgress: any) => {
-                if (oldProgress === 100) {
-                    return 0;
-                }
-                const diff = Math.random() * 10;
-                return Math.min(oldProgress + diff, 100);
-            });
-        }, 500);
+    const uploadMovie = async (videoFile: File) => {
+        const awsSignedUrlRes = await movieService.generateSignedUrl(
+            videoFile?.name
+        );
+        const movieSignedUrl = awsSignedUrlRes.signedRequest;
+        const videoUrl = awsSignedUrlRes.url;
+        await movieService.uploadFile(movieSignedUrl, videoFile);
+        return videoUrl;
+    };
 
-        return () => {
-            clearInterval(timer);
-        };
+    const onInputChange = (e: any) => {
+        if (e.target.name === 'thumbnail') {
+            setMovie(prev => {
+                return {
+                    ...prev,
+                    previewImage: URL.createObjectURL(e.target.files[0]),
+                    imageFile: e.target.files[0],
+                };
+            });
+        }
+        if (e.target.name === 'video') {
+            setMovie(prev => {
+                return {
+                    ...prev,
+                    videFile: e.target.files[0],
+                };
+            });
+        } else {
+            // Name, Release year and language
+            setMovie(prev => {
+                return { ...prev, [e.target.name]: e.target.value };
+            });
+        }
     };
 
     return (
@@ -72,9 +134,10 @@ function CreateMovie() {
                         className="createMovie_input"
                         placeholder="Name"
                         type="text"
+                        name="name"
                         required
-                        value={name}
-                        onChange={e => setName(e.target.value)}
+                        value={movie.name}
+                        onChange={onInputChange}
                     />
                 </div>
                 <div className="createMovie_middle">
@@ -83,10 +146,11 @@ function CreateMovie() {
                         <input
                             className="createMovie_middle_input"
                             placeholder="Year Of Release"
-                            type="text"
+                            type="number"
                             required
-                            value={releaseYear}
-                            onChange={e => setReleaseYear(e.target.value)}
+                            name="releaseYear"
+                            value={movie.releaseYear}
+                            onChange={onInputChange}
                         />
                     </div>
                     <div className="createMovie_middle_group">
@@ -96,8 +160,9 @@ function CreateMovie() {
                             placeholder="Language"
                             type="text"
                             required
-                            value={language}
-                            onChange={e => setLanguage(e.target.value)}
+                            name="language"
+                            value={movie.language}
+                            onChange={onInputChange}
                         />
                     </div>
                 </div>
@@ -106,57 +171,54 @@ function CreateMovie() {
                     <label>Thumbnail</label>
                     <div className="createMovieThumbnail_group">
                         <input
-                            accept="image/*"
-                            onClick={setThumbnailTime}
+                            accept="image/png,image/jpg"
                             className="createMovieThumbnail_input"
                             type="file"
+                            style={{ paddingBottom: '20px' }}
                             required
-                            placeholder="Language"
-                            value={imageUrl}
-                            onChange={e => setImageUrl(e.target.value)}
+                            name="thumbnail"
+                            onChange={onInputChange}
                         />
+                        {movie.previewImage && (
+                            <img
+                                src={movie.previewImage}
+                                height={50}
+                                width={50}
+                            />
+                        )}
                     </div>
-                    <LinearProgress
-                        className="LinearProgress"
-                        variant="determinate"
-                        value={progress}
-                    />
                 </div>
 
                 <div className="createMovie_group">
                     <label>Video FIle</label>
                     <input
                         accept="video/*"
-                        onClick={setVideoTime}
                         className="createMovieThumbnail_input"
                         type="file"
                         required
-                        value={videoUrl}
-                        onChange={e => setVideoUrl(e.target.value)}
+                        name="video"
+                        style={{ paddingBottom: '10px' }}
+                        onChange={onInputChange}
                     />
-                    <LinearProgress
-                        className="LinearProgress"
-                        variant="determinate"
-                        value={videoProgress}
-                    />
-                    {/* <Dropzone
-                        // getUploadParams={() => ({
-                        //     url: 'https://httpbin.org/post',
-                        // })} 
-                        // onChangeStatus={({ meta, file }, status) => {
-                        //     console.log(status, meta, file);
-                        // }}
-                        // onSubmit={files => {
-                        //     // console.log(files.map(f => f.meta));
-                        // }}
-                        accept="image/*,audio/*,video/*"
-                        
-                    /> */}
                 </div>
-
-                <button onClick={save} className="createMovie_button">
-                    Save
-                </button>
+                <div className="createMovie_group_button">
+                    <Button
+                        variant="contained"
+                        disabled={isCreatingMovie}
+                        color="primary"
+                        href="#contained-buttons"
+                        onClick={createMovie}
+                        style={{ width: '100%' }}
+                    >
+                        Save
+                    </Button>
+                    {isCreatingMovie && (
+                        <CircularProgress
+                            size={24}
+                            className={classes.buttonProgress}
+                        />
+                    )}
+                </div>
             </form>
         </div>
     );
