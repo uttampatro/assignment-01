@@ -36,6 +36,7 @@ function Home() {
                 page: currentPage + 1,
                 limit: moviesPerPage,
             });
+            // console.log(result.movieList)
             setMovies(result.movieList);
             setTotalCount(result.pagination.count);
         } catch (error) {
